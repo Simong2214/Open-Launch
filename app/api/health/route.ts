@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server"
 
-import { db } from "@/drizzle/db"
-import { sql } from "drizzle-orm"
-
 // This endpoint will check if the database is accessible
 export async function GET() {
   try {
