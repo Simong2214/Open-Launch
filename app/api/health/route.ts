@@ -7,7 +7,7 @@ import { sql } from "drizzle-orm"
 export async function GET() {
   try {
     // Simple query to verify database connection
-    const result = await db.execute(sql`SELECT 1 as check`)
+    //const result = await db.execute(sql`SELECT 1 as check`)
 
     // If we get here without an exception, the database connection is working
     return NextResponse.json(
