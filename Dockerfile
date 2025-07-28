@@ -32,6 +32,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_SKIP_TYPE_CHECK=1
 ENV NEXT_SKIP_LINT=1
+# Add this near the top of the second stage
+ENV PORT=80
 
 # Build the application
 RUN NODE_OPTIONS="--max_old_space_size=4096" bun run build
@@ -59,10 +61,10 @@ COPY --from=builder /app/drizzle ./drizzle
 RUN bun install --production
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
 # Health check - using a simple path that doesn't require auth
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:80/ || exit 1
 
 # Start command
-CMD ["bun", "run", "start"]
+CMD ["sh", "-c", "PORT=80 bun run start"]
