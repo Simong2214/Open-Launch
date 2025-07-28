@@ -19,11 +19,13 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_SKIP_TYPE_CHECK=1
 ENV NEXT_SKIP_LINT=1
-ENV PORT=80
+ENV NEXT_PUBLIC_URL=https://open-launch.com
+ENV PORT=3001
 ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
 ENV DATABASE_URL=mock_db_url
 ENV RESEND_API_KEY=re_mockvalue
 ENV STRIPE_SECRET_KEY=sk_test_mockvalue
+ENV NEXT_PUBLIC_UPLOADTHING_URL=yxucdfr9f5.ufs.sh
 
 RUN NODE_OPTIONS="--max_old_space_size=4096" bun run build
 
