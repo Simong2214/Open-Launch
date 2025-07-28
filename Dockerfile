@@ -8,6 +8,8 @@ ENV NODE_ENV=${NODE_ENV:-production}
 ENV NEXT_PUBLIC_UPLOADTHING_URL=yxucdfr9f5.ufs.sh
 ENV NEXT_PUBLIC_URL=https://open-launch.com
 ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
+ENV STRIPE_SECRET_KEY=sk_test_mockvalue
+ENV RESEND_API_KEY=re_mockvalue
 ENV DATABASE_URL=mock_db_url
 
 WORKDIR /app
