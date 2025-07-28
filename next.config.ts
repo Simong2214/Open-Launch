@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_UPLOADTHING_URL!,
+        hostname: process.env.NEXT_PUBLIC_UPLOADTHING_URL! || "yxucdfr9f5.ufs.sh",
       },
       {
         protocol: "https",

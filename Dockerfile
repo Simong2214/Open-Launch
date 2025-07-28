@@ -1,5 +1,13 @@
 FROM oven/bun:1 as builder
 
+# add build arguments
+ARG NODE_ENV
+ARG NEXT_PUBLIC_UPLOADTHING_URL
+
+# Set environment variables
+ENV NODE_ENV=${NODE_ENV:-production}
+ENV NEXT_PUBLIC_UPLOADTHING_URL=${NEXT_PUBLIC_UPLOADTHING_URL:-yxucdfr9f5.ufs.sh}
+
 WORKDIR /app
 
 # Install Node.js 18 for compatibility with ICU library
