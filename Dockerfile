@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y nodejs npm curl postgresql-client && ap
 COPY --from=builder /app /app
 
 # Expose port
-EXPOSE 80
+EXPOSE 3001
 
 # Simple health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:80/ || exit 1
@@ -51,7 +51,7 @@ bunx drizzle-kit push\n\
 echo "Seeding categories..."\n\
 bun scripts/categories.ts\n\
 echo "Starting application..."\n\
-PORT=80 bun run start\n\
+PORT=3001 bun run start\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Start command runs the initialization script
