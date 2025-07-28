@@ -1,68 +1,58 @@
 FROM oven/bun:1 as builder
 
-# add build arguments
-ARG NODE_ENV
-
-# Set minimal environment variables
-ENV NODE_ENV=${NODE_ENV:-production}
-ENV NEXT_PUBLIC_UPLOADTHING_URL=yxucdfr9f5.ufs.sh
-ENV NEXT_PUBLIC_URL=https://open-launch.com
-ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
-ENV STRIPE_SECRET_KEY=sk_test_mockvalue
-ENV RESEND_API_KEY=re_mockvalue
-ENV DATABASE_URL=mock_db_url
-
 WORKDIR /app
 
-# Install Node.js 18 for compatibility with ICU library
+# Install Node.js and essential tools
 RUN apt-get update && apt-get install -y nodejs npm && apt-get clean
 
-# Copy package files
+# Copy package files first for better caching
 COPY package.json bun.lockb ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install ALL dependencies (including dev dependencies for drizzle-kit)
+RUN bun install
 
-# Copy the rest of the app
+# Copy entire application
 COPY . .
 
-# Skip tests and checks during build
+# Build the application
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_SKIP_TYPE_CHECK=1
 ENV NEXT_SKIP_LINT=1
 ENV PORT=80
+ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
+ENV DATABASE_URL=mock_db_url
+ENV RESEND_API_KEY=re_mockvalue
+ENV STRIPE_SECRET_KEY=sk_test_mockvalue
 
-# Build the application
 RUN NODE_OPTIONS="--max_old_space_size=4096" bun run build
 
-# Production image
+# Create a production image with everything included
 FROM oven/bun:1
 
 WORKDIR /app
 
-# Install Node.js 18 for ICU compatibility
+# Install necessary tools
 RUN apt-get update && apt-get install -y nodejs npm curl postgresql-client && apt-get clean
 
-# Copy everything needed
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/bun.lockb ./bun.lockb
-COPY --from=builder /app/next.config.ts ./next.config.ts
-COPY --from=builder /app/drizzle ./drizzle
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
-
-# Install production dependencies only
-RUN bun install --production
+# Copy EVERYTHING from the builder stage
+COPY --from=builder /app /app
 
 # Expose port
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:80/ || exit 1
+# Simple health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:80/ || exit 1
 
-# Start command
-CMD ["sh", "-c", "PORT=80 bun run start"]
+# Create an initialization script
+RUN echo '#!/bin/sh\n\
+echo "Initializing database..."\n\
+bunx drizzle-kit push\n\
+echo "Seeding categories..."\n\
+bun scripts/categories.ts\n\
+echo "Starting application..."\n\
+PORT=80 bun run start\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# Start command runs the initialization script
+CMD ["/app/start.sh"]
