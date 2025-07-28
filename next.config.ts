@@ -42,6 +42,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "nexty.dev",
       },
+      {
+        protocol: "https",
+        hostname: "yxucdfr9f5.ufs.sh",
+      },
     ],
   },
 }
