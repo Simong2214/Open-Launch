@@ -8,6 +8,24 @@ ARG NEXT_PUBLIC_UPLOADTHING_URL
 ENV NODE_ENV=${NODE_ENV:-production}
 ENV NEXT_PUBLIC_UPLOADTHING_URL=${NEXT_PUBLIC_UPLOADTHING_URL:-yxucdfr9f5.ufs.sh}
 
+# Mock environment variables for build time only
+# These are placeholder values for build process - not real credentials
+ENV STRIPE_SECRET_KEY=sk_test_mockbuildvalue
+ENV RESEND_API_KEY=re_mockbuildvalue
+ENV STRIPE_WEBHOOK_SECRET=whsec_mockbuildvalue
+ENV GOOGLE_CLIENT_SECRET=mock_secret
+ENV GITHUB_CLIENT_SECRET=mock_secret
+ENV TURNSTILE_SECRET_KEY=mock_secret
+ENV DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/mock
+ENV DISCORD_LAUNCH_WEBHOOK_URL=https://discord.com/api/webhooks/mock
+ENV UPLOADTHING_TOKEN=mock_token
+ENV PLAUSIBLE_API_KEY=mock_key
+ENV PLAUSIBLE_URL=https://plausible.io
+ENV PLAUSIBLE_SITE_ID=mock_site
+ENV CRON_API_KEY=mock_key
+ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
+ENV BETTER_AUTH_URL=https://example.com
+
 WORKDIR /app
 
 # Install Node.js 18 for compatibility with ICU library
