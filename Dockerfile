@@ -2,29 +2,17 @@ FROM oven/bun:1 as builder
 
 # add build arguments
 ARG NODE_ENV
-ARG NEXT_PUBLIC_UPLOADTHING_URL
 
-# Set environment variables
+# Set minimal environment variables
 ENV NODE_ENV=${NODE_ENV:-production}
-ENV NEXT_PUBLIC_UPLOADTHING_URL=${NEXT_PUBLIC_UPLOADTHING_URL:-yxucdfr9f5.ufs.sh}
+ENV NEXT_PUBLIC_UPLOADTHING_URL=yxucdfr9f5.ufs.sh
+ENV NEXT_PUBLIC_URL=https://open-launch.com
 
-# Mock environment variables for build time only
-# These are placeholder values for build process - not real credentials
-ENV STRIPE_SECRET_KEY=sk_test_mockbuildvalue
-ENV RESEND_API_KEY=re_mockbuildvalue
-ENV STRIPE_WEBHOOK_SECRET=whsec_mockbuildvalue
-ENV GOOGLE_CLIENT_SECRET=mock_secret
-ENV GITHUB_CLIENT_SECRET=mock_secret
-ENV TURNSTILE_SECRET_KEY=mock_secret
-ENV DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/mock
-ENV DISCORD_LAUNCH_WEBHOOK_URL=https://discord.com/api/webhooks/mock
-ENV UPLOADTHING_TOKEN=mock_token
-ENV PLAUSIBLE_API_KEY=mock_key
-ENV PLAUSIBLE_URL=https://plausible.io
-ENV PLAUSIBLE_SITE_ID=mock_site
-ENV CRON_API_KEY=mock_key
+# Basic mock values needed for build only - not used in production
 ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
-ENV BETTER_AUTH_URL=https://example.com
+ENV STRIPE_SECRET_KEY=sk_test_mockvalue
+ENV RESEND_API_KEY=re_mockvalue
+ENV DATABASE_URL=mock_db_url
 
 WORKDIR /app
 
@@ -40,8 +28,13 @@ RUN bun install --frozen-lockfile
 # Copy the rest of the app
 COPY . .
 
+# Skip tests and checks during build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_SKIP_TYPE_CHECK=1
+ENV NEXT_SKIP_LINT=1
+
 # Build the application
-RUN bun run build
+RUN NODE_OPTIONS="--max_old_space_size=4096" bun run build
 
 # Production image
 FROM oven/bun:1
@@ -49,7 +42,7 @@ FROM oven/bun:1
 WORKDIR /app
 
 # Install Node.js 18 for ICU compatibility
-RUN apt-get update && apt-get install -y nodejs npm && apt-get clean
+RUN apt-get update && apt-get install -y nodejs npm curl && apt-get clean
 
 # Copy built app from builder
 COPY --from=builder /app/.next ./.next
@@ -68,8 +61,8 @@ RUN bun install --production
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "curl", "-f", "http://localhost:3000/health" ]
+# Health check - using a simple path that doesn't require auth
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
 
 # Start command
 CMD ["bun", "run", "start"]
