@@ -40,11 +40,15 @@ RUN apt-get update && apt-get install -y nodejs npm curl postgresql-client && ap
 # Copy EVERYTHING from the builder stage
 COPY --from=builder /app /app
 
+# Set environment variables for runtime
+ENV PORT=3001
+ENV HOST=0.0.0.0
+
 # Expose port
 EXPOSE 3001
 
-# Simple health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:80/ || exit 1
+# Simple health check - FIX: use port 3001
+HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:3001/ || exit 1
 
 # Create an initialization script
 RUN echo '#!/bin/sh\n\
@@ -53,7 +57,8 @@ bunx drizzle-kit push\n\
 echo "Seeding categories..."\n\
 bun scripts/categories.ts\n\
 echo "Starting application..."\n\
-PORT=3001 bun run start\n\
+# FIX: Add HOST and use -p flag to be explicit about port\n\
+HOST=0.0.0.0 bun run start -p 3001\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Start command runs the initialization script
