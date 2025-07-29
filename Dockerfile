@@ -20,7 +20,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_SKIP_TYPE_CHECK=1
 ENV NEXT_SKIP_LINT=1
 ENV NEXT_PUBLIC_URL=https://open-launch.com
-ENV PORT=3001
+ENV PORT=3000
 ENV BETTER_AUTH_SECRET=mock_secret_at_least_32_chars_long_for_build
 ENV DATABASE_URL=mock_db_url
 ENV RESEND_API_KEY=re_mockvalue
@@ -41,14 +41,14 @@ RUN apt-get update && apt-get install -y nodejs npm curl postgresql-client && ap
 COPY --from=builder /app /app
 
 # Set environment variables for runtime
-ENV PORT=3001
+ENV PORT=3000
 ENV HOST=0.0.0.0
 
 # Expose port
-EXPOSE 3001
+EXPOSE 3000
 
-# Simple health check - FIX: use port 3001
-HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:3001/ || exit 1
+# Simple health check - FIX: use port 3000
+HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
 
 # Create an initialization script
 RUN echo '#!/bin/sh\n\
@@ -58,7 +58,7 @@ echo "Seeding categories..."\n\
 bun scripts/categories.ts\n\
 echo "Starting application..."\n\
 # FIX: Add HOST and use -p flag to be explicit about port\n\
-HOST=0.0.0.0 bun run start -p 3001\n\
+HOST=0.0.0.0 bun run start -p 3000\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Start command runs the initialization script
